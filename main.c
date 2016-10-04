@@ -723,7 +723,6 @@ int				main(void)
 	g_player.xp_til_ding = 3;
 	generate_map();
 	ft_putendl("Put walls where they belong.");
-	init_mobs();
 	action_buffer = (char*)malloc(128);
 	line_of_sight();
 	display_map();
@@ -736,6 +735,7 @@ int				main(void)
 			g_player.cur_health--;
 		g_player.sanity--;
 		parser(action_buffer);
+		mob_actions();
 		line_of_sight();
 		display_map();
 		ft_strclr(action_buffer);

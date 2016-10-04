@@ -17,7 +17,7 @@
 # include <time.h>
 # include <math.h>
 
-# define GETL(r, c) (g_locs[(r) * g_cols + (c)])
+# define GETL(r, c) (g_locs[(r) * g_cols + (c)]) //	Get a location!
 # define ABS(x) ((x) < 0 ? -(x) : (x))
 
 # define P_C (g_player.col)
@@ -161,5 +161,6 @@ extern t_loot		*g_loot;
 
 void				generate_map(void);
 void				init_mobs(void);
+void				mob_actions(void);
 
 #endif
