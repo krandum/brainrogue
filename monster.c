@@ -117,14 +117,30 @@ static void	slime_action(t_mob *slime)
 						corners += 4;
 					if (GETL(slime->row - 1, slime->col - 1).solid)
 						corners += 8;
-					if (corners == 9)
-						slime->dir = 0;
-					else if (corners == 3)
-						slime->dir = 1;
-					else if (corners == 6)
-						slime->dir = 2;
-					else if (corners == 12)
-						slime->dir = 3;
+					if (slime->wild == 0)
+					{
+						if (corners == 9)
+							slime->dir = 0;
+						else if (corners == 3)
+							slime->dir = 1;
+						else if (corners == 6)
+							slime->dir = 2;
+						else if (corners == 12)
+							slime->dir = 3;
+						slime->wild = 1;
+					}
+					else
+					{
+						if (corners == 9)
+							slime->dir = 3;
+						else if (corners == 3)
+							slime->dir = 0;
+						else if (corners == 6)
+							slime->dir = 1;
+						else if (corners == 12)
+							slime->dir = 2;
+						slime->wild = 0;
+					}
 				}
 			}
 		}
@@ -142,28 +158,22 @@ static void	slime_action(t_mob *slime)
 				case 0:
 					slime->loc = &GETL(slime->row - 1, slime->col);
 					slime->row--;
-					GETL(slime->row, slime->col).has_mob = 1;
-					GETL(slime->row, slime->col).entity = slime;
 					break;
 				case 1:
 					slime->loc = &GETL(slime->row, slime->col + 1);
 					slime->col++;
-					GETL(slime->row, slime->col).has_mob = 1;
-					GETL(slime->row, slime->col).entity = slime;
 					break;
 				case 2:
 					slime->loc = &GETL(slime->row + 1, slime->col);
 					slime->row++;
-					GETL(slime->row, slime->col).has_mob = 1;
-					GETL(slime->row, slime->col).entity = slime;
 					break;
 				case 3:
 					slime->loc = &GETL(slime->row, slime->col - 1);
 					slime->col--;
-					GETL(slime->row, slime->col).has_mob = 1;
-					GETL(slime->row, slime->col).entity = slime;
 					break;
 			}
+			GETL(slime->row, slime->col).has_mob = 1;
+			GETL(slime->row, slime->col).entity = slime;
 			i++;
 		}
 	}
@@ -203,6 +213,7 @@ void		init_mobs(void)
 			g_mobs[i].speed = 3;
 			g_mobs[i].health = 5;
 			g_mobs[i].kill_xp = 2;
+			g_mobs[i].wild = 0;
 		}
 		g_mobs[i].dir = -1;
 		g_mobs[i].loc = &GETL(r, c);

@@ -10,7 +10,7 @@
 #                                                                              #
 # **************************************************************************** #
 
-FILENAMES	= main.c dungeon.c monster.c
+FILENAMES	= main.c dungeon.c monster.c player.c
 
 NAME		= rogue
 FLAGS		= -Wall -Wextra -Werror

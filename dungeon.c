@@ -508,13 +508,13 @@ void		generate_map(void)
 			dir += 8;
 		if (dir == 5)
 		{
-			printf("attempting bust_wall_hor\n");
+			//printf("attempting bust_wall_hor\n");
 			if (bust_wall_hor(r, c))
 				access++;
 		}
 		else if (dir == 10)
 		{
-			printf("attempting bust_wall_ver\n");
+			//printf("attempting bust_wall_ver\n");
 			if (bust_wall_ver(r, c))
 				access++;
 		}

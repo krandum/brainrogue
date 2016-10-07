@@ -27,6 +27,7 @@ static void		init_locs(void)
 	size_t	r;
 	size_t	c;
 
+	//	Initialize all locations to their default values
 	r = -1;
 	while (++r < g_rows)
 	{
@@ -36,6 +37,7 @@ static void		init_locs(void)
 			GETL(r, c).entity = 0;
 			GETL(r, c).tiletype = TILE_FLOOR;
 			GETL(r, c).seen = 0;
+			//	The edges should be solid and distinct
 			if (!r || !c || r == g_rows - 1 || c == g_cols - 1)
 			{
 				GETL(r, c).tiletype = TILE_EDGE;
@@ -73,6 +75,7 @@ static void		display_map(void)
 	char	*buf;
 	char	*icon;
 
+	//	Let us allocate a buffer to then print out
 	buf = (char*)malloc(BUF_SIZE);
 	buf[0] = 0;
 	i = -60;
@@ -86,9 +89,10 @@ static void		display_map(void)
 			c = 0;
 		while (c < (int)P_C + 50 && c < COLS)
 		{
+			//	Let us find the correct Icon to add to our buffer
 			if (!GETL(r, c).seen)
 				icon = LOC_INVIS;
-			else if (GETL(r, c).trailindex == 0) //	Seen and not Traily
+			else if (GETL(r, c).trailindex != TRAIL_PLAYER) //	Seen and not Traily
 			{
 				if (GETL(r, c).tiletype == TILE_FLOOR)
 				{
@@ -120,14 +124,14 @@ static void		display_map(void)
 					else
 						icon = LOC_DOOR_CS;
 				}
+				if (GETL(r, c).visible && GETL(r, c).trailindex == TRAIL_SLIME)
+					icon = SLIME_TRAIL;
 			}
-			else //	Seen and yes Traily
+			else //	Seen and yes Player Traily
 			{
 				if (GETL(r, c).trailindex == TRAIL_PLAYER)
 					icon = PLAYER_TRAIL;
-				else if (GETL(r, c).trailindex == TRAIL_SLIME)
-					icon = SLIME_TRAIL;
-				if (GETL(r, c).trailindex != TRAIL_SLIME)
+				if (GETL(r, c).trailindex == TRAIL_PLAYER)
 					GETL(r, c).trailindex = NO_TRAIL;
 			}
 			if (GETL(r, c).seen && GETL(r, c).has_loot)
@@ -419,275 +423,6 @@ static void		line_of_sight(void)
 				p += 1 - 2 * x;
 			}
 		}
-	}
-}
-
-static void		parser(char *s)
-{
-	char	c;
-	int		dr, dc, i, moved;
-
-	i = 0;
-	while (*s && i++ < (int)g_player.actions)
-	{
-		moved = 0;
-		switch (*s)
-		{
-			case 'w':
-			case 'W':
-				if (!GETL(P_R - 1, P_C).solid)
-				{
-					g_player.loc->trailindex = TRAIL_PLAYER;
-					P_R--;
-					g_player.loc = &GETL(P_R, P_C);
-					moved = 1;
-				}
-				break;
-			case 'a':
-			case 'A':
-				if (!GETL(P_R, P_C - 1).solid)
-				{
-					g_player.loc->trailindex = TRAIL_PLAYER;
-					P_C--;
-					g_player.loc = &GETL(P_R, P_C);
-					moved = 1;
-				}
-				break;
-			case 's':
-			case 'S':
-				if (!GETL(P_R + 1, P_C).solid)
-				{
-					g_player.loc->trailindex = TRAIL_PLAYER;
-					P_R++;
-					g_player.loc = &GETL(P_R, P_C);
-					moved = 1;
-				}
-				break;
-			case 'd':
-			case 'D':
-				if (!GETL(P_R, P_C + 1).solid)
-				{
-					g_player.loc->trailindex = TRAIL_PLAYER;
-					P_C++;
-					g_player.loc = &GETL(P_R, P_C);
-					moved = 1;
-				}
-				break;
-			case 'r':
-			case 'R':
-				c = *(++s);
-				switch (c)
-				{
-					case 'w':
-					case 'W':
-						dr = -1;
-						dc = 0;
-						break;
-					case 'a':
-					case 'A':
-						dr = 0;
-						dc = -1;
-						break;
-					case 's':
-					case 'S':
-						dr = 1;
-						dc = 0;
-						break;
-					case 'd':
-					case 'D':
-						dr = 0;
-						dc = 1;
-						break;
-					default:
-						dr = 0;
-						dc = 0;
-						break;
-				}
-				if (ABS(dr + dc) != 1)
-					break;
-				while (!GETL(P_R + dr, P_C + dc).solid)
-				{
-					moved = 0;
-					if (!GETL(P_R + dr, P_C + dc).solid)
-					{
-						g_player.loc->trailindex = TRAIL_PLAYER;
-						P_R += dr;
-						P_C += dc;
-						g_player.loc = &GETL(P_R, P_C);
-						moved = 1;
-					}
-					if (moved && GETL(P_R, P_C).has_loot && GETL(P_R, P_C).entity)
-					{
-						if (((t_loot*)GETL(P_R, P_C).entity)->type ==
-							UP_WITNESS)
-							g_player.witness += 2;
-						else if (((t_loot*)GETL(P_R, P_C).entity)->type ==
-							UP_SANITY)
-							g_player.sanity += (g_player.san_max -
-								g_player.sanity) / 2;
-						else if (((t_loot*)GETL(P_R, P_C).entity)->type ==
-							UP_ACTIONS)
-							g_player.actions++;
-						else if (((t_loot*)GETL(P_R, P_C).entity)->type ==
-							UP_XP)
-						{
-							g_player.xp += 3;
-							if (g_player.xp >= g_player.xp_til_ding)
-							{
-								g_player.level++;
-								g_player.xp_til_ding += g_player.level + 2;
-								g_player.xp = 0;
-								g_player.san_max += g_player.level + 4;
-								g_player.sanity = g_player.san_max;
-								g_player.max_health += g_player.level + 1;
-								g_player.cur_health += (g_player.max_health -
-									g_player.cur_health) / 2;
-							}
-						}
-						else if (((t_loot*)GETL(P_R, P_C).entity)->type ==
-							UP_HEALTH)
-						{
-							if (g_player.cur_health < g_player.max_health)
-							{
-								g_player.cur_health += 2;
-								if (g_player.cur_health > g_player.max_health)
-									g_player.cur_health = g_player.max_health;
-							}
-							else
-							{
-								g_player.max_health++;
-								g_player.cur_health++;
-							}
-						}
-						GETL(P_R, P_C).entity = 0;
-						GETL(P_R, P_C).has_loot = 0;
-					}
-				}
-				break;
-			case 'o':
-			case 'O':
-				c = *(++s);
-				switch (c)
-				{
-					case 'w':
-					case 'W':
-						dr = -1;
-						dc = 0;
-						break;
-					case 'a':
-					case 'A':
-						dr = 0;
-						dc = -1;
-						break;
-					case 's':
-					case 'S':
-						dr = 1;
-						dc = 0;
-						break;
-					case 'd':
-					case 'D':
-						dr = 0;
-						dc = 1;
-						break;
-					default:
-						dr = 0;
-						dc = 0;
-						break;
-				}
-				if (ABS(dr + dc) != 1)
-					break;
-				if (GETL(P_R + dr, P_C + dc).tiletype == TILE_DOOR_C)
-				{
-					GETL(P_R + dr, P_C + dc).tiletype = TILE_DOOR_O;
-					GETL(P_R + dr, P_C + dc).solid = 0;
-				}
-				break;
-			case 'c':
-			case 'C':
-				c = *(++s);
-				switch (c)
-				{
-					case 'w':
-					case 'W':
-						dr = -1;
-						dc = 0;
-						break;
-					case 'a':
-					case 'A':
-						dr = 0;
-						dc = -1;
-						break;
-					case 's':
-					case 'S':
-						dr = 1;
-						dc = 0;
-						break;
-					case 'd':
-					case 'D':
-						dr = 0;
-						dc = 1;
-						break;
-					default:
-						dr = 0;
-						dc = 0;
-						break;
-				}
-				if (ABS(dr + dc) != 1)
-					break;
-				if (GETL(P_R + dr, P_C + dc).tiletype == TILE_DOOR_O)
-				{
-					GETL(P_R + dr, P_C + dc).tiletype = TILE_DOOR_C;
-					GETL(P_R + dr, P_C + dc).solid = 1;
-				}
-				break;
-		}
-		if (moved && GETL(P_R, P_C).has_loot && GETL(P_R, P_C).entity)
-		{
-			if (((t_loot*)GETL(P_R, P_C).entity)->type ==
-				UP_WITNESS)
-				g_player.witness += 2;
-			else if (((t_loot*)GETL(P_R, P_C).entity)->type ==
-				UP_SANITY)
-				g_player.sanity += (g_player.san_max -
-					g_player.sanity) / 2;
-			else if (((t_loot*)GETL(P_R, P_C).entity)->type ==
-				UP_ACTIONS)
-				g_player.actions++;
-			else if (((t_loot*)GETL(P_R, P_C).entity)->type ==
-				UP_XP)
-			{
-				g_player.xp += 3;
-				if (g_player.xp >= g_player.xp_til_ding)
-				{
-					g_player.level++;
-					g_player.xp_til_ding += g_player.level + 2;
-					g_player.xp = 0;
-					g_player.san_max += g_player.level + 4;
-					g_player.sanity = g_player.san_max;
-					g_player.max_health += g_player.level + 1;
-					g_player.cur_health += (g_player.max_health -
-						g_player.cur_health) / 2;
-				}
-			}
-			else if (((t_loot*)GETL(P_R, P_C).entity)->type ==
-				UP_HEALTH)
-			{
-				if (g_player.cur_health < g_player.max_health)
-				{
-					g_player.cur_health += 2;
-					if (g_player.cur_health > g_player.max_health)
-						g_player.cur_health = g_player.max_health;
-				}
-				else
-				{
-					g_player.max_health++;
-					g_player.cur_health++;
-				}
-			}
-			GETL(P_R, P_C).entity = 0;
-			GETL(P_R, P_C).has_loot = 0;
-		}
-		s++;
 	}
 }
 

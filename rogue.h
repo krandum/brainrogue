@@ -66,7 +66,7 @@
 # define NUM_UPGRADES 5
 # define MAP_LOOT 30
 
-# define NUM_SLIMES 15
+# define NUM_SLIMES 30
 
 //	TODO: inventory
 //	TODO: basic mobs
@@ -92,7 +92,7 @@ typedef struct		s_loc
 {
 	void			*entity;
 	t_tile			tiletype; //	ID for tile, see above
-	t_trail			trailindex; //	Trail type, 0 for no trail, 1 for player
+	t_trail			trailindex; //	Trail type
 	int				seen:1; //	Previously seen
 	int				visible:1; //	Currently visible
 	int				solid:1; //	Cannot see through and cannot move into
@@ -128,6 +128,7 @@ typedef struct		s_mob
 	struct s_loc	*loc;
 	unsigned int	row;
 	unsigned int	col;
+	uint8_t			wild;
 	uint8_t			vis_rad;
 	uint8_t			speed;
 	uint8_t			health;
@@ -161,6 +162,7 @@ extern t_loot		*g_loot;
 
 void				generate_map(void);
 void				init_mobs(void);
+void				parser(char *s);
 void				mob_actions(void);
 
 #endif
