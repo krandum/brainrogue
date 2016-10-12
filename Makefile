@@ -6,7 +6,7 @@
 #    By: palatorr <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/09/26 12:15:50 by palatorr          #+#    #+#              #
-#    Updated: 2016/09/26 12:15:53 by palatorr         ###   ########.fr        #
+#    Updated: 2016/10/12 14:46:13 by palatorr         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@ FILENAMES	= main.c dungeon.c monster.c player.c
 
 NAME		= rogue
 FLAGS		= -Wall -Wextra -Werror
-LIBFTDIR	= ~/libft/
+LIBFTDIR	= ./libft/
 
 SRC			= $(FILENAMES)
 OBJS		= $(addprefix build/, $(FILENAMES:.c=.o))
