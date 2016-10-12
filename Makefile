@@ -14,29 +14,41 @@ FILENAMES	= main.c dungeon.c monster.c player.c
 
 NAME		= rogue
 FLAGS		= -Wall -Wextra -Werror
+
+LIBFT		= ./libft/libft.a
 LIBFTDIR	= ./libft/
 
 SRC			= $(FILENAMES)
-OBJS		= $(addprefix build/, $(FILENAMES:.c=.o))
+OBJ			= $(addprefix $(OBJDIR),$(SRC:.c=.o))
 
-all: $(NAME)
+INCDIR		= ./includes/
+SRCDIR		= ./src/
+OBJDIR		= ./obj/
+
+all: libft obj $(NAME)
 
 re: fclean all
 
 clean:
-	@rm -rf build/
+	@rm -rf $(OBJDIR)
 
 fclean: clean
 	@rm -rf $(NAME)
 
-build:
-	@mkdir build/
+obj:
+	@mkdir -p $(OBJDIR)
 
-$(NAME): $(OBJS)
+libft:
+	$(LIBFT)
+
+$(LIBFT):
+	make -C $(LIBFTDIR)
+
+$(OBJDIR)%.o: $(SRCDIR)%.c
+	@gcc $(FLAGS) -I $(LIBFTDIR) -I $(INCDIR) -c $< -o $@
+
+$(NAME): $(OBJ)
 	gcc $(FLAGS) $^ -o $@ -L $(LIBFTDIR) -lft
-
-build/%.o: %.c rogue.h | build
-	@gcc $(FLAGS) -I $(LIBFTDIR) -c $< -o $@
 
 f: re
 	./$(NAME)
